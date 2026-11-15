@@ -150,7 +150,14 @@
 
         if (error) throw error;
 
-        const result = data[0];
+        console.log("Supabase 回傳資料：", data);
+console.log("Supabase 錯誤：", error);
+
+if (!data || !data.length) {
+  throw new Error("Supabase 沒有回傳報名結果");
+}
+
+const result = data[0];
 
         if (result.registration_status === "pending") {
           message.textContent =
