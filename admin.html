@@ -146,7 +146,7 @@ td select { width: 120px; }
     <input
       id="searchInput"
       type="text"
-      placeholder="搜尋姓名、電話或 Email"
+      placeholder="搜尋學生姓名、家長姓名、電話、Email、LINE ID 或學校"
     >
     <button id="exportButton">匯出 Excel</button>
 <button id="refreshButton">重新整理</button>
@@ -156,15 +156,22 @@ td select { width: 120px; }
   <div class="table-wrap">
     <table>
       <thead>
-        <tr>
-          <th>姓名</th>
-          <th>電話</th>
-          <th>Email</th>
-          <th>報名狀態</th>
-          <th>繳費狀態</th>
-          <th>報名時間</th>
-        </tr>
-      </thead>
+  <tr>
+    <th>學生姓名</th>
+    <th>性別</th>
+    <th>出生年月日</th>
+    <th>學齡</th>
+    <th>就讀學校</th>
+    <th>舞齡與舞蹈風格</th>
+    <th>家長姓名</th>
+    <th>手機</th>
+    <th>Email</th>
+    <th>LINE ID</th>
+    <th>報名狀態</th>
+    <th>繳費狀態</th>
+    <th>報名時間</th>
+  </tr>
+</thead>
       <tbody id="registrationList"></tbody>
     </table>
   </div>
@@ -229,7 +236,22 @@ async function loadRegistrations() {
 
   const { data, error } = await db
     .from("registrations")
-    .select("id, name, phone, email, status, payment_status, created_at")
+    .select(`
+      id,
+      name,
+      phone,
+      email,
+      gender,
+      birth_date,
+      grade,
+      school,
+      dance_experience,
+      guardian_name,
+      line_id,
+      status,
+      payment_status,
+      created_at
+    `)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -262,6 +284,7 @@ function updateStatistics() {
     "目前共有 " + allRegistrations.length + " 筆報名資料";
 }
 
+
 function renderRegistrations(data) {
   const list = document.getElementById("registrationList");
   list.innerHTML = "";
@@ -269,7 +292,7 @@ function renderRegistrations(data) {
   if (data.length === 0) {
     const tr = document.createElement("tr");
     const td = document.createElement("td");
-    td.colSpan = 6;
+    td.colSpan = 13;
     td.textContent = "找不到符合條件的學員資料";
     tr.appendChild(td);
     list.appendChild(tr);
@@ -286,8 +309,15 @@ function renderRegistrations(data) {
     }
 
     addText(item.name);
+    addText(item.gender);
+    addText(item.birth_date);
+    addText(item.grade);
+    addText(item.school);
+    addText(item.dance_experience);
+    addText(item.guardian_name);
     addText(item.phone);
     addText(item.email);
+    addText(item.line_id);
 
     const statusCell = document.createElement("td");
     const statusSelect = document.createElement("select");
@@ -350,30 +380,6 @@ function renderRegistrations(data) {
   });
 }
 
-async function updateField(id, field, value, select) {
-  select.disabled = true;
-  showMessage("正在儲存修改……", true);
-
-  const { data, error } = await db
-    .from("registrations")
-    .update({ [field]: value })
-    .eq("id", id)
-    .select("id");
-
-  select.disabled = false;
-
-  if (error || !data || data.length === 0) {
-    showMessage(
-      "修改失敗：" + (error ? error.message : "沒有成功更新資料")
-    );
-    await loadRegistrations();
-    return;
-  }
-
-  showMessage("修改成功！", true);
-  await loadRegistrations();
-}
-
 function searchRegistrations() {
   const keyword = document
     .getElementById("searchInput")
@@ -381,10 +387,16 @@ function searchRegistrations() {
     .toLowerCase();
 
   const filtered = allRegistrations.filter(item => {
-    return (
-      (item.name || "").toLowerCase().includes(keyword) ||
-      (item.phone || "").toLowerCase().includes(keyword) ||
-      (item.email || "").toLowerCase().includes(keyword)
+    return [
+      item.name,
+      item.guardian_name,
+      item.phone,
+      item.email,
+      item.line_id,
+      item.school,
+      item.grade
+    ].some(value =>
+      (value || "").toLowerCase().includes(keyword)
     );
   });
 
@@ -403,9 +415,16 @@ function exportExcel() {
   }
 
   const rows = allRegistrations.map(item => ({
-    "姓名": item.name,
-    "電話": item.phone,
+    "學生姓名": item.name,
+    "性別": item.gender || "",
+    "出生年月日": item.birth_date || "",
+    "目前學齡": item.grade || "",
+    "就讀學校": item.school || "",
+    "舞齡與舞蹈風格": item.dance_experience || "",
+    "家長姓名": item.guardian_name || "",
+    "手機號碼": item.phone,
     "電子郵件": item.email || "",
+    "LINE ID": item.line_id || "",
     "報名狀態": {
       pending: "待確認",
       confirmed: "已確認",
@@ -427,45 +446,16 @@ function exportExcel() {
   XLSX.utils.book_append_sheet(
     workbook,
     worksheet,
-    "學員報名名單"
+    "完整學員資料"
   );
 
   XLSX.writeFile(
     workbook,
-    "育陽舞蹈團_報名名單.xlsx"
+    "育陽舞蹈團_完整報名名單.xlsx"
   );
 
-  showMessage("Excel 名單已匯出！", true);
+  showMessage("完整 Excel 名單已匯出！", true);
 }
-
-document.getElementById("loginButton")
-.addEventListener("click", async () => {
-  const button = document.getElementById("loginButton");
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
-
-  if (!email || !password) {
-    showMessage("請輸入電子郵件及密碼。");
-    return;
-  }
-
-  button.disabled = true;
-  showMessage("登入中……", true);
-
-  const { error } = await db.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  button.disabled = false;
-
-  if (error) {
-    showMessage("登入失敗：" + error.message);
-    return;
-  }
-
-  await checkAdmin();
-});
 
 document.getElementById("logoutButton")
 .addEventListener("click", async () => {
