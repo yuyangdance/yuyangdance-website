@@ -1,0 +1,242 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理者後台｜育陽舞蹈團</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f3f0;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 30px auto;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 3px 15px #0001;
+    }
+    h1 { text-align: center; }
+    input, button {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 13px;
+      margin: 8px 0;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    button {
+      background: #655344;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:disabled { opacity: .6; }
+    #message { margin: 12px 0; color: #b33; }
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 700px;
+    }
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+    }
+    th { background: #f3eee9; }
+    .hidden { display: none; }
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .top button { width: auto; padding: 10px 18px; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>YU YANG DANCE 育陽舞蹈團</h1>
+  <h2>管理者後台</h2>
+
+  <section id="loginArea">
+    <h3>管理者登入</h3>
+    <input id="email" type="email" placeholder="管理者電子郵件">
+    <input id="password" type="password" placeholder="登入密碼">
+    <button id="loginButton">登入</button>
+  </section>
+
+  <div id="message"></div>
+
+  <section id="adminArea" class="hidden">
+    <div class="top">
+      <h3>學員報名名單</h3>
+      <button id="logoutButton">登出</button>
+    </div>
+
+    <p id="total"></p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>姓名</th>
+            <th>電話</th>
+            <th>電子郵件</th>
+            <th>報名狀態</th>
+            <th>繳費狀態</th>
+            <th>報名時間</th>
+          </tr>
+        </thead>
+        <tbody id="registrationList"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+  // 請填入原本的 Supabase Project URL 和 Publishable Key
+  const SUPABASE_URL = "https://aubecuexezekhurqpgnh.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_ANt2-fgu_mihXGzKVle_1g_RGZZp9VG";
+
+  const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+  const loginArea = document.getElementById("loginArea");
+  const adminArea = document.getElementById("adminArea");
+  const message = document.getElementById("message");
+
+  function showMessage(text, isError = true) {
+    message.style.color = isError ? "#b33" : "#287a42";
+    message.textContent = text;
+  }
+
+  async function checkAdmin() {
+    const { data: { user }, error: userError } =
+      await db.auth.getUser();
+
+    if (userError || !user) {
+      loginArea.classList.remove("hidden");
+      adminArea.classList.add("hidden");
+      return;
+    }
+
+    // 確認登入帳號是否在管理者名單中
+    const { data: admins, error: adminError } =
+      await db.from("admin_users")
+        .select("*")
+        .limit(1);
+
+    if (adminError) {
+      showMessage("管理者權限確認失敗：" + adminError.message);
+      return;
+    }
+
+    if (!admins || admins.length === 0) {
+      await db.auth.signOut();
+      showMessage("此帳號沒有管理者權限。");
+      return;
+    }
+
+    loginArea.classList.add("hidden");
+    adminArea.classList.remove("hidden");
+    showMessage("登入成功！", false);
+
+    loadRegistrations();
+  }
+
+  async function loadRegistrations() {
+    const { data, error } = await db
+      .from("registrations")
+      .select("name, phone, email, status, payment_status, created_at")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      showMessage("讀取報名資料失敗：" + error.message);
+      return;
+    }
+
+    document.getElementById("total").textContent =
+      "目前報名資料共 " + data.length + " 筆";
+
+    const list = document.getElementById("registrationList");
+    list.innerHTML = "";
+
+    data.forEach(item => {
+      const tr = document.createElement("tr");
+
+      const values = [
+        item.name,
+        item.phone,
+        item.email || "未提供",
+        item.status || "pending",
+        item.payment_status || "unpaid",
+        item.created_at
+          ? new Date(item.created_at).toLocaleString("zh-TW")
+          : ""
+      ];
+
+      values.forEach(value => {
+        const td = document.createElement("td");
+        td.textContent = value;
+        tr.appendChild(td);
+      });
+
+      list.appendChild(tr);
+    });
+  }
+
+  document.getElementById("loginButton")
+    .addEventListener("click", async () => {
+      const button = document.getElementById("loginButton");
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      if (!email || !password) {
+        showMessage("請輸入電子郵件及密碼。");
+        return;
+      }
+
+      button.disabled = true;
+      showMessage("登入中……", false);
+
+      const { error } = await db.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      button.disabled = false;
+
+      if (error) {
+        showMessage("登入失敗：" + error.message);
+        return;
+      }
+
+      await checkAdmin();
+    });
+
+  document.getElementById("logoutButton")
+    .addEventListener("click", async () => {
+      await db.auth.signOut();
+      adminArea.classList.add("hidden");
+      loginArea.classList.remove("hidden");
+      showMessage("已登出。", false);
+    });
+
+  checkAdmin();
+</script>
+
+</body>
+</html>
