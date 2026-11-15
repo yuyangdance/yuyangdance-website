@@ -2,51 +2,665 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YU YANG DANCE 育陽舞蹈團</title>
-  <style>
-    body {
-      margin: 0;
-      background: #111;
-      color: white;
-      font-family: sans-serif;
-      text-align: center;
-    }
-    header {
-      padding: 70px 20px;
-      background: linear-gradient(135deg, #292018, #090909);
-    }
-    h1 {
-      letter-spacing: 4px;
-      color: #d8b879;
-    }
-    p {
-      line-height: 2;
-    }
-    .content {
-      padding: 40px 20px;
-    }
-    button {
-      background: #d8b879;
-      border: none;
-      padding: 14px 28px;
-      border-radius: 5px;
-      font-size: 16px;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>YU YANG DANCE</h1>
-    <p>育陽舞蹈團</p>
-    <p>用舞蹈，記錄每一份感動。</p>
-  </header>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#11100e">
+<meta name="description" content="YU YANG DANCE 育陽舞蹈團，讓舞蹈成為生命中最美的語言。">
+<title>YU YANG DANCE｜育陽舞蹈團</title>
 
-  <section class="content">
-    <h2>WELCOME TO OUR DANCE WORLD</h2>
-    <p>歡迎來到育陽舞蹈團官方網站</p>
-    <button>認識我們</button>
-  </section>
+<style>
+:root {
+  --gold: #c9a96e;
+  --light-gold: #ead5a5;
+  --black: #11100e;
+  --dark: #191714;
+  --white: #f5f1e9;
+  --gray: #aaa49a;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  line-height: 1.8;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  width: 100%;
+  object-fit: cover;
+}
+
+.container {
+  width: min(1120px, 90%);
+  margin: auto;
+}
+
+.gold {
+  color: var(--gold);
+}
+
+/* 導覽列 */
+
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(17,16,14,.96);
+  border-bottom: 1px solid rgba(201,169,110,.25);
+  backdrop-filter: blur(10px);
+}
+
+.nav-inner {
+  min-height: 76px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  color: var(--gold);
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: 3px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 28px;
+  align-items: center;
+  font-size: 13px;
+}
+
+.nav-links a:hover {
+  color: var(--gold);
+}
+
+.menu-btn {
+  display: none;
+  color: var(--gold);
+  background: none;
+  border: 1px solid var(--gold);
+  padding: 6px 12px;
+  font-size: 20px;
+}
+
+/* 首頁主視覺 */
+
+.hero {
+  min-height: 680px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, rgba(10,9,8,.92), rgba(10,9,8,.25)),
+    linear-gradient(0deg, #11100e, transparent),
+    url("images/hero.jpg") center 35% / cover no-repeat;
+}
+
+.hero-content {
+  width: min(1120px, 90%);
+  margin: auto;
+  padding: 100px 0;
+}
+
+.hero-label {
+  color: var(--gold);
+  letter-spacing: 5px;
+  font-size: 13px;
+  margin-bottom: 24px;
+}
+
+.hero h1 {
+  font-family: Georgia, serif;
+  font-size: clamp(42px, 8vw, 82px);
+  letter-spacing: 5px;
+  line-height: 1.2;
+}
+
+.hero h2 {
+  font-size: 26px;
+  font-weight: 400;
+  letter-spacing: 8px;
+  margin-top: 18px;
+}
+
+.hero p {
+  color: #ddd5c8;
+  margin-top: 28px;
+  font-size: 17px;
+}
+
+.gold-btn {
+  display: inline-block;
+  margin-top: 35px;
+  padding: 13px 36px;
+  background: var(--gold);
+  color: #17130d;
+  font-weight: bold;
+  letter-spacing: 2px;
+  transition: .3s;
+}
+
+.gold-btn:hover {
+  background: var(--light-gold);
+  transform: translateY(-3px);
+}
+
+/* 共用區塊 */
+
+section {
+  padding: 100px 0;
+}
+
+.section-title {
+  text-align: center;
+  margin-bottom: 55px;
+}
+
+.section-title span {
+  color: var(--gold);
+  font-family: Georgia, serif;
+  letter-spacing: 5px;
+  font-size: 13px;
+}
+
+.section-title h2 {
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: 5px;
+  margin-top: 10px;
+}
+
+.section-title p {
+  color: var(--gray);
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+/* 關於我們 */
+
+.about {
+  background: var(--dark);
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 55px;
+  align-items: center;
+}
+
+.about-image {
+  height: 430px;
+  background: #28231c;
+}
+
+.about-image img {
+  height: 100%;
+}
+
+.about-text h3 {
+  color: var(--gold);
+  font-size: 24px;
+  font-weight: 400;
+  margin-bottom: 22px;
+}
+
+.about-text p {
+  color: #c6c0b6;
+  margin-bottom: 17px;
+  font-size: 15px;
+}
+
+/* 課程 */
+
+.course-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+
+.course-card {
+  padding: 35px 24px;
+  background: #1b1915;
+  border: 1px solid rgba(201,169,110,.25);
+  text-align: center;
+  transition: .3s;
+}
+
+.course-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--gold);
+}
+
+.course-card h3 {
+  color: var(--gold);
+  font-size: 21px;
+  margin-bottom: 15px;
+}
+
+.course-card p {
+  color: var(--gray);
+  font-size: 14px;
+}
+
+/* 演出照片 */
+
+.gallery {
+  background: var(--dark);
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.gallery-item {
+  height: 310px;
+  overflow: hidden;
+  background: #28231c;
+}
+
+.gallery-item img {
+  height: 100%;
+  transition: transform .5s;
+}
+
+.gallery-item:hover img {
+  transform: scale(1.06);
+}
+
+/* 最新消息 */
+
+.news-list {
+  max-width: 800px;
+  margin: auto;
+}
+
+.news-item {
+  padding: 22px 10px;
+  border-bottom: 1px solid rgba(201,169,110,.2);
+  display: flex;
+  gap: 25px;
+  align-items: center;
+}
+
+.news-item time {
+  color: var(--gold);
+  font-family: Georgia, serif;
+  white-space: nowrap;
+}
+
+.news-item p {
+  color: #ddd5c8;
+}
+
+/* 招生區 */
+
+.join {
+  background:
+    linear-gradient(rgba(12,10,8,.85), rgba(12,10,8,.9)),
+    url("images/hero.jpg") center / cover;
+  text-align: center;
+}
+
+.join h2 {
+  font-size: 35px;
+  letter-spacing: 5px;
+}
+
+.join p {
+  color: #ccc3b5;
+  margin-top: 18px;
+}
+
+/* 頁尾 */
+
+footer {
+  padding: 50px 20px;
+  background: #090908;
+  text-align: center;
+  border-top: 1px solid rgba(201,169,110,.2);
+}
+
+footer h2 {
+  color: var(--gold);
+  letter-spacing: 4px;
+  font-size: 23px;
+}
+
+footer p {
+  color: var(--gray);
+  font-size: 13px;
+  margin-top: 12px;
+}
+
+footer .copyright {
+  margin-top: 28px;
+  font-size: 11px;
+}
+
+/* 手機版 */
+
+@media(max-width: 768px) {
+  .nav-inner {
+    min-height: 65px;
+  }
+
+  .logo {
+    font-size: 17px;
+    letter-spacing: 2px;
+  }
+
+  .menu-btn {
+    display: block;
+  }
+
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 65px;
+    left: 0;
+    width: 100%;
+    background: #171511;
+    flex-direction: column;
+    padding: 25px;
+    gap: 20px;
+  }
+
+  .nav-links.active {
+    display: flex;
+  }
+
+  .hero {
+    min-height: 580px;
+    background-position: 58% center;
+  }
+
+  .hero h2 {
+    font-size: 21px;
+    letter-spacing: 5px;
+  }
+
+  section {
+    padding: 70px 0;
+  }
+
+  .section-title h2 {
+    font-size: 25px;
+  }
+
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .about-image {
+    height: 320px;
+  }
+
+  .course-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .gallery-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .gallery-item {
+    height: 220px;
+  }
+
+  .news-item {
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .join h2 {
+    font-size: 27px;
+  }
+}
+
+@media(max-width: 380px) {
+  .gallery-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- 導覽列 -->
+<nav>
+  <div class="container nav-inner">
+    <a class="logo" href="#home">YU YANG DANCE</a>
+
+    <button class="menu-btn"
+      aria-label="開啟選單"
+      aria-expanded="false"
+      onclick="toggleMenu()">☰</button>
+
+    <div class="nav-links" id="navLinks">
+      <a href="#home">首頁</a>
+      <a href="#about">關於我們</a>
+      <a href="#courses">舞蹈課程</a>
+      <a href="#gallery">精彩演出</a>
+      <a href="#news">最新消息</a>
+      <a href="#join">加入我們</a>
+    </div>
+  </div>
+</nav>
+
+<!-- 首頁 -->
+<header class="hero" id="home">
+  <div class="hero-content">
+    <div class="hero-label">YU YANG DANCE COMPANY</div>
+
+    <h1>YU YANG<br>DANCE</h1>
+
+    <h2>育陽舞蹈團</h2>
+
+    <p>以舞蹈為語言，讓每一份感動都能被看見。</p>
+
+    <a href="#about" class="gold-btn">探索我們的故事</a>
+  </div>
+</header>
+
+<!-- 關於我們 -->
+<section class="about" id="about">
+  <div class="container">
+    <div class="section-title">
+      <span>ABOUT US</span>
+      <h2>關於育陽</h2>
+      <p>每一個舞步，都是我們對舞蹈的熱愛。</p>
+    </div>
+
+    <div class="about-grid">
+      <div class="about-image">
+        <img src="images/about.jpg"
+          alt="育陽舞蹈團表演照片">
+      </div>
+
+      <div class="about-text">
+        <h3>讓舞蹈，成為生命中的美好。</h3>
+
+        <p>
+          歡迎來到 YU YANG DANCE 育陽舞蹈團。
+          我們相信，舞蹈不只是動作的呈現，
+          更是一種情感的表達與生命的交流。
+        </p>
+
+        <p>
+          在每一次練習、每一次演出中，
+          我們因為舞蹈相遇、成長，
+          也在彼此的陪伴中創造屬於我們的回憶。
+        </p>
+
+        <p>
+          讓我們一起用身體說故事，
+          用舞蹈留下最美好的時光。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 課程 -->
+<section id="courses">
+  <div class="container">
+    <div class="section-title">
+      <span>OUR CLASSES</span>
+      <h2>舞蹈課程</h2>
+      <p>探索身體的可能，感受舞蹈的魅力。</p>
+    </div>
+
+    <div class="course-grid">
+
+      <div class="course-card">
+        <h3>基礎舞蹈</h3>
+        <p>從基本動作開始，培養身體協調與節奏感。</p>
+      </div>
+
+      <div class="course-card">
+        <h3>進階舞蹈</h3>
+        <p>精進舞蹈技巧，展現更豐富的肢體表現。</p>
+      </div>
+
+      <div class="course-card">
+        <h3>舞台展演</h3>
+        <p>透過團隊合作與舞台演出，累積表演經驗。</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- 精彩演出 -->
+<section class="gallery" id="gallery">
+  <div class="container">
+    <div class="section-title">
+      <span>OUR PERFORMANCE</span>
+      <h2>精彩演出</h2>
+      <p>每一張照片，都收藏著舞台上的感動。</p>
+    </div>
+
+    <div class="gallery-grid">
+
+      <div class="gallery-item">
+        <img src="images/dance-01.jpg"
+          alt="育陽舞蹈團演出一">
+      </div>
+
+      <div class="gallery-item">
+        <img src="images/dance-02.jpg"
+          alt="育陽舞蹈團演出二">
+      </div>
+
+      <div class="gallery-item">
+        <img src="images/dance-03.jpg"
+          alt="育陽舞蹈團演出三">
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- 最新消息 -->
+<section id="news">
+  <div class="container">
+    <div class="section-title">
+      <span>LATEST NEWS</span>
+      <h2>最新消息</h2>
+      <p>關注育陽舞蹈團的最新活動。</p>
+    </div>
+
+    <div class="news-list">
+
+      <div class="news-item">
+        <time>2026</time>
+        <p>歡迎來到育陽舞蹈團官方網站。</p>
+      </div>
+
+      <div class="news-item">
+        <time>NEWS</time>
+        <p>更多舞團活動與演出資訊，敬請期待。</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- 招生 -->
+<section class="join" id="join">
+  <div class="container">
+    <div class="section-title">
+      <span>JOIN OUR FAMILY</span>
+      <h2>加入育陽舞蹈團</h2>
+      <p>讓我們一起在舞蹈中相遇，創造更多美好。</p>
+    </div>
+
+    <!-- 將下方網址替換成自己的 Google 表單網址 -->
+    <a href="YOUR_GOOGLE_FORM_URL"
+      class="gold-btn"
+      target="_blank"
+      rel="noopener noreferrer">
+      線上報名
+    </a>
+  </div>
+</section>
+
+<!-- 頁尾 -->
+<footer>
+  <h2>YU YANG DANCE</h2>
+  <p>育陽舞蹈團</p>
+  <p>用舞蹈，記錄每一份感動。</p>
+  <p class="copyright">
+    © 2026 YU YANG DANCE. All Rights Reserved.
+  </p>
+</footer>
+
+<script>
+function toggleMenu() {
+  const menu = document.getElementById("navLinks");
+  const button = document.querySelector(".menu-btn");
+
+  menu.classList.toggle("active");
+  button.setAttribute(
+    "aria-expanded",
+    menu.classList.contains("active")
+  );
+}
+
+document.querySelectorAll(".nav-links a").forEach(link => {
+  link.addEventListener("click", () => {
+    document.getElementById("navLinks")
+      .classList.remove("active");
+
+    document.querySelector(".menu-btn")
+      .setAttribute("aria-expanded", "false");
+  });
+});
+</script>
+
 </body>
 </html>
