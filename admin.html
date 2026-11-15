@@ -202,6 +202,28 @@ function showMessage(text, success = false) {
   message.textContent = text;
 }
 
+document.getElementById("loginButton").addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+
+  if (!email || !password) {
+    showMessage("請輸入管理者帳號及密碼。");
+    return;
+  }
+
+  const { error } = await db.auth.signInWithPassword({
+    email: email,
+    password: password
+  });
+
+  if (error) {
+    showMessage("登入失敗：" + error.message);
+    return;
+  }
+
+  await checkAdmin();
+});
+  
 async function checkAdmin() {
   const { data: { user }, error: userError } =
     await db.auth.getUser();
