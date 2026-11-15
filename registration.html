@@ -85,6 +85,49 @@
       white-space: pre-line;
     }
 
+    .capacity {
+  background: #f7f2ec;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 22px;
+}
+
+.capacity-title {
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.capacity-number {
+  font-size: 30px;
+  font-weight: bold;
+  color: #655344;
+}
+
+.capacity-total {
+  font-size: 16px;
+  color: #888;
+}
+
+.progress {
+  width: 100%;
+  height: 10px;
+  background: #e5ded6;
+  border-radius: 20px;
+  overflow: hidden;
+  margin: 14px 0 10px;
+}
+
+#progressBar {
+  height: 100%;
+  width: 0%;
+  background: #8c7057;
+  transition: width .3s;
+}
+
+.capacity-detail {
+  font-size: 14px;
+  color: #777;
+}
     .note {
       color: #777;
       font-size: 13px;
@@ -103,6 +146,22 @@
       YU YANG DANCE 育陽舞蹈團
     </div>
 
+    <div class="capacity">
+  <div class="capacity-title">目前招生狀況</div>
+
+  <div class="capacity-number">
+    <span id="registeredCount">讀取中</span>
+    <span class="capacity-total">/ 30 人</span>
+  </div>
+
+  <div class="progress">
+    <div id="progressBar"></div>
+  </div>
+
+  <div class="capacity-detail" id="capacityDetail">
+    正在查詢剩餘名額……
+  </div>
+    </div>
     <div class="info">
       <strong>培訓課程資訊</strong><br>
       授課師資：韓國舞蹈大師<br>
@@ -186,6 +245,51 @@
       SUPABASE_KEY
     );
 
+    // 讀取目前招生名額
+async function loadCapacity() {
+  const countElement = document.getElementById("registeredCount");
+  const detailElement = document.getElementById("capacityDetail");
+  const progressBar = document.getElementById("progressBar");
+  const capacityTotal = 30;
+
+  try {
+    const { data, error } = await db.rpc(
+      "get_registration_count"
+    );
+
+    if (error) {
+      throw error;
+    }
+
+    const registered = Number(data);
+    const remaining = Math.max(0, capacityTotal - registered);
+    const percentage = Math.min(
+      100,
+      (registered / capacityTotal) * 100
+    );
+
+    countElement.textContent = registered;
+    progressBar.style.width = percentage + "%";
+
+    if (remaining > 0) {
+      detailElement.textContent =
+        "已占名額 " + registered +
+        " 人，目前剩餘 " + remaining + " 名。";
+    } else {
+      detailElement.textContent =
+        "目前招生名額已滿，歡迎填寫表單登記候補。";
+    }
+
+  } catch (error) {
+    console.error("名額查詢失敗：", error);
+    countElement.textContent = "--";
+    detailElement.textContent =
+      "目前無法取得名額資訊，請稍後重新整理。";
+  }
+}
+
+// 網頁開啟時自動查詢
+loadCapacity();
     // 處理報名送出
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -249,6 +353,9 @@
 
         // 成功後才清空表單
         form.reset();
+        
+        // 更新目前招生名額
+await loadCapacity();
 
       } catch (error) {
 
