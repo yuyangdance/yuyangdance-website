@@ -162,9 +162,10 @@
         form.reset();
 
       } catch (error) {
-        console.error(error);
-        message.textContent =
-          "報名送出失敗，請稍後再試，或聯絡主辦單位。";
+  console.error(error);
+  message.textContent =
+    "報名失敗：" + (error.message || String(error));
+      }
       } finally {
         button.disabled = false;
         button.textContent = "送出報名申請";
