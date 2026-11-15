@@ -1,0 +1,175 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>韓國舞蹈大師培訓｜育陽舞蹈團</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 30px 16px;
+      background: #f7f4f0;
+      color: #333;
+      font-family: Arial, "Noto Sans TC", sans-serif;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 30px 24px;
+      border-radius: 16px;
+      box-shadow: 0 5px 25px #00000012;
+    }
+    h1 { text-align: center; font-size: 25px; }
+    .subtitle {
+      text-align: center;
+      color: #987b61;
+      margin-bottom: 28px;
+    }
+    .info {
+      background: #f7f2ec;
+      padding: 18px;
+      border-radius: 10px;
+      line-height: 1.9;
+      margin-bottom: 25px;
+    }
+    label {
+      display: block;
+      margin: 17px 0 7px;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    button {
+      width: 100%;
+      margin-top: 25px;
+      padding: 15px;
+      background: #8c7057;
+      color: white;
+      border: 0;
+      border-radius: 8px;
+      font-size: 17px;
+      cursor: pointer;
+    }
+    button:disabled { opacity: .6; }
+    #message {
+      margin-top: 20px;
+      text-align: center;
+      line-height: 1.8;
+      white-space: pre-line;
+    }
+    .note {
+      color: #777;
+      font-size: 13px;
+      line-height: 1.8;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <h1>韓國舞蹈大師培訓</h1>
+    <div class="subtitle">YU YANG DANCE 育陽舞蹈團</div>
+
+    <div class="info">
+      <strong>培訓課程資訊</strong><br>
+      授課師資：韓國舞蹈大師<br>
+      課程形式：完整培訓課程報名<br>
+      招生名額：30 名<br>
+      課程日期：尚未確定，另行公告<br>
+      繳費方式：報名後由主辦單位通知繳費
+    </div>
+
+    <form id="registrationForm">
+      <label for="name">姓名 *</label>
+      <input id="name" name="name" required maxlength="80"
+        autocomplete="name" placeholder="請輸入真實姓名">
+
+      <label for="phone">聯絡電話 *</label>
+      <input id="phone" name="phone" required maxlength="30"
+        autocomplete="tel" placeholder="請輸入聯絡電話">
+
+      <label for="email">電子郵件</label>
+      <input id="email" name="email" type="email" maxlength="254"
+        autocomplete="email" placeholder="請輸入電子郵件">
+
+      <button id="submitButton" type="submit">送出報名申請</button>
+    </form>
+
+    <div id="message" role="status" aria-live="polite"></div>
+
+    <div class="note">
+      ※ 本課程採整體培訓報名，不需分堂選擇。<br>
+      ※ 報名後主辦單位將另行通知繳費方式。<br>
+      ※ 報名資料僅供主辦單位處理課程報名使用。
+    </div>
+  </main>
+
+  <script>
+    const SUPABASE_URL = "https://aubecuexezekhurqpgnh.supabase.co/rest/v1/";
+    const SUPABASE_KEY = "sb_publishable_ANt2-fgu_mihXGzKVle_1g_RGZZp9VG";
+
+    const db = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+    const form = document.getElementById("registrationForm");
+    const button = document.getElementById("submitButton");
+    const message = document.getElementById("message");
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const name = document.getElementById("name").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const email = document.getElementById("email").value.trim();
+
+      button.disabled = true;
+      button.textContent = "送出中...";
+      message.textContent = "";
+
+      try {
+        const { data, error } = await db.rpc(
+          "submit_registration",
+          {
+            p_name: name,
+            p_phone: phone,
+            p_email: email || null
+          }
+        );
+
+        if (error) throw error;
+
+        const result = data[0];
+
+        if (result.registration_status === "pending") {
+          message.textContent =
+            "報名申請已送出！\n目前為待確認狀態，主辦單位將另行通知繳費。";
+        } else {
+          message.textContent =
+            "目前招生名額已滿，已為您登記候補。\n如有名額釋出，主辦單位將另行聯絡。";
+        }
+
+        form.reset();
+
+      } catch (error) {
+        console.error(error);
+        message.textContent =
+          "報名送出失敗，請稍後再試，或聯絡主辦單位。";
+      } finally {
+        button.disabled = false;
+        button.textContent = "送出報名申請";
+      }
+    });
+  </script>
+</body>
+</html>
