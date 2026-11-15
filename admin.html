@@ -2,240 +2,337 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>管理者後台｜育陽舞蹈團</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f3f0;
-      margin: 0;
-      padding: 20px;
-      color: #333;
-    }
-    .container {
-      max-width: 1000px;
-      margin: 30px auto;
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 3px 15px #0001;
-    }
-    h1 { text-align: center; }
-    input, button {
-      box-sizing: border-box;
-      width: 100%;
-      padding: 13px;
-      margin: 8px 0;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      font-size: 16px;
-    }
-    button {
-      background: #655344;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    button:disabled { opacity: .6; }
-    #message { margin: 12px 0; color: #b33; }
-    .table-wrap { overflow-x: auto; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 700px;
-    }
-    th, td {
-      padding: 12px;
-      border-bottom: 1px solid #eee;
-      text-align: left;
-    }
-    th { background: #f3eee9; }
-    .hidden { display: none; }
-    .top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-    }
-    .top button { width: auto; padding: 10px 18px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理者後台｜育陽舞蹈團</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f3f0;
+  margin: 0;
+  padding: 20px;
+  color: #333;
+}
+.container {
+  max-width: 1100px;
+  margin: 30px auto;
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 3px 15px #0001;
+}
+h1 { text-align: center; }
+input, button, select {
+  box-sizing: border-box;
+  padding: 11px;
+  margin: 6px 0;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 15px;
+}
+input { width: 100%; }
+button {
+  background: #655344;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+button:disabled, select:disabled {
+  opacity: .5;
+}
+#loginButton { width: 100%; }
+#message { margin: 12px 0; }
+.hidden { display: none; }
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.top button { padding: 10px 18px; }
+.table-wrap { overflow-x: auto; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+th, td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+th { background: #f3eee9; }
+select { width: 125px; }
+</style>
 </head>
+
 <body>
 
 <div class="container">
-  <h1>YU YANG DANCE 育陽舞蹈團</h1>
-  <h2>管理者後台</h2>
 
-  <section id="loginArea">
-    <h3>管理者登入</h3>
-    <input id="email" type="email" placeholder="管理者電子郵件">
-    <input id="password" type="password" placeholder="登入密碼">
-    <button id="loginButton">登入</button>
-  </section>
+<h1>YU YANG DANCE 育陽舞蹈團</h1>
+<h2>管理者後台</h2>
 
-  <div id="message"></div>
+<section id="loginArea">
+  <h3>管理者登入</h3>
+  <input id="email" type="email" placeholder="管理者電子郵件">
+  <input id="password" type="password" placeholder="登入密碼">
+  <button id="loginButton">登入</button>
+</section>
 
-  <section id="adminArea" class="hidden">
-    <div class="top">
-      <h3>學員報名名單</h3>
-      <button id="logoutButton">登出</button>
-    </div>
+<div id="message"></div>
 
-    <p id="total"></p>
+<section id="adminArea" class="hidden">
 
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>姓名</th>
-            <th>電話</th>
-            <th>電子郵件</th>
-            <th>報名狀態</th>
-            <th>繳費狀態</th>
-            <th>報名時間</th>
-          </tr>
-        </thead>
-        <tbody id="registrationList"></tbody>
-      </table>
-    </div>
-  </section>
+  <div class="top">
+    <h3>學員報名名單</h3>
+    <button id="logoutButton">登出</button>
+  </div>
+
+  <p id="total"></p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>姓名</th>
+          <th>電話</th>
+          <th>Email</th>
+          <th>報名狀態</th>
+          <th>繳費狀態</th>
+          <th>報名時間</th>
+        </tr>
+      </thead>
+      <tbody id="registrationList"></tbody>
+    </table>
+  </div>
+
+</section>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-  // 請填入原本的 Supabase Project URL 和 Publishable Key
-  const SUPABASE_URL = "https://aubecuexezekhurqpgnh.supabase.co";
+const SUPABASE_URL = "https://aubecuexezekhurqpgnh.supabase.co";
     const SUPABASE_KEY = "sb_publishable_ANt2-fgu_mihXGzKVle_1g_RGZZp9VG";
 
-  const db = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+const loginArea = document.getElementById("loginArea");
+const adminArea = document.getElementById("adminArea");
+const message = document.getElementById("message");
+
+function showMessage(text, success = false) {
+  message.style.color = success ? "#287a42" : "#b33";
+  message.textContent = text;
+}
+
+async function checkAdmin() {
+  const { data: { user }, error: userError } =
+    await db.auth.getUser();
+
+  if (userError || !user) {
+    loginArea.classList.remove("hidden");
+    adminArea.classList.add("hidden");
+    return;
+  }
+
+  const { data: admin, error } = await db
+    .from("admin_users")
+    .select("user_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (error || !admin) {
+    await db.auth.signOut();
+    showMessage("此帳號沒有管理者權限。");
+    return;
+  }
+
+  loginArea.classList.add("hidden");
+  adminArea.classList.remove("hidden");
+
+  showMessage("登入成功！", true);
+  await loadRegistrations();
+}
+
+async function loadRegistrations() {
+  const { data, error } = await db
+    .from("registrations")
+    .select("id, name, phone, email, status, payment_status, created_at")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    showMessage("讀取失敗：" + error.message);
+    return;
+  }
+
+  document.getElementById("total").textContent =
+    "目前報名資料共 " + data.length + " 筆";
+
+  const list = document.getElementById("registrationList");
+  list.innerHTML = "";
+
+  data.forEach(item => {
+    const tr = document.createElement("tr");
+
+    function addText(value) {
+      const td = document.createElement("td");
+      td.textContent = value || "未提供";
+      tr.appendChild(td);
+    }
+
+    addText(item.name);
+    addText(item.phone);
+    addText(item.email);
+
+    // 報名狀態選單
+    const statusCell = document.createElement("td");
+    const statusSelect = document.createElement("select");
+
+    const statusOptions = [
+      ["pending", "待確認"],
+      ["confirmed", "已確認"],
+      ["waitlist", "候補"],
+      ["cancelled", "取消"]
+    ];
+
+    statusOptions.forEach(([value, label]) => {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = label;
+      statusSelect.appendChild(option);
+    });
+
+    statusSelect.value = item.status || "pending";
+
+    statusSelect.addEventListener("change", async () => {
+      await updateField(
+        item.id,
+        "status",
+        statusSelect.value,
+        statusSelect
+      );
+    });
+
+    statusCell.appendChild(statusSelect);
+    tr.appendChild(statusCell);
+
+    // 繳費狀態選單
+    const paymentCell = document.createElement("td");
+    const paymentSelect = document.createElement("select");
+
+    const paymentOptions = [
+      ["unpaid", "未繳費"],
+      ["paid", "已繳費"]
+    ];
+
+    paymentOptions.forEach(([value, label]) => {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = label;
+      paymentSelect.appendChild(option);
+    });
+
+    paymentSelect.value = item.payment_status || "unpaid";
+
+    paymentSelect.addEventListener("change", async () => {
+      await updateField(
+        item.id,
+        "payment_status",
+        paymentSelect.value,
+        paymentSelect
+      );
+    });
+
+    paymentCell.appendChild(paymentSelect);
+    tr.appendChild(paymentCell);
+
+    addText(
+      item.created_at
+        ? new Date(item.created_at).toLocaleString("zh-TW")
+        : ""
+    );
+
+    list.appendChild(tr);
+  });
+}
+
+async function updateField(id, field, value, select) {
+  select.disabled = true;
+  showMessage("正在儲存修改……", true);
+
+  const { error } = await db
+    .from("registrations")
+    .update({ [field]: value })
+    .eq("id", id);
+
+  select.disabled = false;
+
+  if (error) {
+    showMessage("修改失敗：" + error.message);
+    await loadRegistrations();
+    return;
+  }
+
+  const labels = {
+    pending: "待確認",
+    confirmed: "已確認",
+    waitlist: "候補",
+    cancelled: "取消",
+    unpaid: "未繳費",
+    paid: "已繳費"
+  };
+
+  showMessage(
+    "修改成功！目前狀態：" + labels[value],
+    true
   );
+}
 
-  const loginArea = document.getElementById("loginArea");
-  const adminArea = document.getElementById("adminArea");
-  const message = document.getElementById("message");
+document.getElementById("loginButton")
+.addEventListener("click", async () => {
+  const button = document.getElementById("loginButton");
 
-  function showMessage(text, isError = true) {
-    message.style.color = isError ? "#b33" : "#287a42";
-    message.textContent = text;
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+
+  if (!email || !password) {
+    showMessage("請輸入電子郵件及密碼。");
+    return;
   }
 
-  async function checkAdmin() {
-    const { data: { user }, error: userError } =
-      await db.auth.getUser();
+  button.disabled = true;
+  showMessage("登入中……", true);
 
-    if (userError || !user) {
-      loginArea.classList.remove("hidden");
-      adminArea.classList.add("hidden");
-      return;
-    }
+  const { error } = await db.auth.signInWithPassword({
+    email,
+    password
+  });
 
-    // 確認登入帳號是否在管理者名單中
-    const { data: admins, error: adminError } =
-      await db.from("admin_users")
-        .select("*")
-        .limit(1);
+  button.disabled = false;
 
-    if (adminError) {
-      showMessage("管理者權限確認失敗：" + adminError.message);
-      return;
-    }
-
-    if (!admins || admins.length === 0) {
-      await db.auth.signOut();
-      showMessage("此帳號沒有管理者權限。");
-      return;
-    }
-
-    loginArea.classList.add("hidden");
-    adminArea.classList.remove("hidden");
-    showMessage("登入成功！", false);
-
-    loadRegistrations();
+  if (error) {
+    showMessage("登入失敗：" + error.message);
+    return;
   }
 
-  async function loadRegistrations() {
-    const { data, error } = await db
-      .from("registrations")
-      .select("name, phone, email, status, payment_status, created_at")
-      .order("created_at", { ascending: false });
+  await checkAdmin();
+});
 
-    if (error) {
-      showMessage("讀取報名資料失敗：" + error.message);
-      return;
-    }
+document.getElementById("logoutButton")
+.addEventListener("click", async () => {
+  await db.auth.signOut();
+  adminArea.classList.add("hidden");
+  loginArea.classList.remove("hidden");
+  showMessage("已登出。", true);
+});
 
-    document.getElementById("total").textContent =
-      "目前報名資料共 " + data.length + " 筆";
-
-    const list = document.getElementById("registrationList");
-    list.innerHTML = "";
-
-    data.forEach(item => {
-      const tr = document.createElement("tr");
-
-      const values = [
-        item.name,
-        item.phone,
-        item.email || "未提供",
-        item.status || "pending",
-        item.payment_status || "unpaid",
-        item.created_at
-          ? new Date(item.created_at).toLocaleString("zh-TW")
-          : ""
-      ];
-
-      values.forEach(value => {
-        const td = document.createElement("td");
-        td.textContent = value;
-        tr.appendChild(td);
-      });
-
-      list.appendChild(tr);
-    });
-  }
-
-  document.getElementById("loginButton")
-    .addEventListener("click", async () => {
-      const button = document.getElementById("loginButton");
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
-
-      if (!email || !password) {
-        showMessage("請輸入電子郵件及密碼。");
-        return;
-      }
-
-      button.disabled = true;
-      showMessage("登入中……", false);
-
-      const { error } = await db.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      button.disabled = false;
-
-      if (error) {
-        showMessage("登入失敗：" + error.message);
-        return;
-      }
-
-      await checkAdmin();
-    });
-
-  document.getElementById("logoutButton")
-    .addEventListener("click", async () => {
-      await db.auth.signOut();
-      adminArea.classList.add("hidden");
-      loginArea.classList.remove("hidden");
-      showMessage("已登出。", false);
-    });
-
-  checkAdmin();
+checkAdmin();
 </script>
 
 </body>
