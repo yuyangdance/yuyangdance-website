@@ -4,21 +4,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>管理者後台｜育陽舞蹈團</title>
+<title>育陽舞蹈團｜管理者後台</title>
 
 <style>
 body {
   font-family: Arial, sans-serif;
   background: #f5f3f0;
   margin: 0;
-  padding: 20px;
+  padding: 16px;
   color: #333;
 }
 .container {
   max-width: 1100px;
-  margin: 30px auto;
+  margin: 20px auto;
   background: white;
-  padding: 25px;
+  padding: 22px;
   border-radius: 12px;
   box-shadow: 0 3px 15px #0001;
 }
@@ -38,19 +38,46 @@ button {
   border: none;
   cursor: pointer;
 }
-button:disabled, select:disabled {
-  opacity: .5;
-}
+button:disabled { opacity: .5; }
 #loginButton { width: 100%; }
 #message { margin: 12px 0; }
 .hidden { display: none; }
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 18px 0;
+}
+.stat {
+  background: #f5f1ed;
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+}
+.stat strong {
+  display: block;
+  font-size: 25px;
+  margin-top: 8px;
+}
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.toolbar input {
+  flex: 1;
+  min-width: 180px;
+}
+.toolbar button { padding: 12px 16px; }
+
 .top {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 10px;
 }
-.top button { padding: 10px 18px; }
 .table-wrap { overflow-x: auto; }
 table {
   width: 100%;
@@ -63,12 +90,14 @@ th, td {
   text-align: left;
 }
 th { background: #f3eee9; }
-select { width: 125px; }
+td select { width: 120px; }
+@media (min-width: 700px) {
+  .stats { grid-template-columns: repeat(4, 1fr); }
+}
 </style>
 </head>
 
 <body>
-
 <div class="container">
 
 <h1>YU YANG DANCE 育陽舞蹈團</h1>
@@ -86,11 +115,42 @@ select { width: 125px; }
 <section id="adminArea" class="hidden">
 
   <div class="top">
-    <h3>學員報名名單</h3>
+    <h3>學員報名管理</h3>
     <button id="logoutButton">登出</button>
   </div>
 
+  <h3>報名統計</h3>
+
+  <div class="stats">
+    <div class="stat">
+      待確認
+      <strong id="pendingCount">0</strong>
+    </div>
+    <div class="stat">
+      已確認
+      <strong id="confirmedCount">0</strong>
+    </div>
+    <div class="stat">
+      候補
+      <strong id="waitlistCount">0</strong>
+    </div>
+    <div class="stat">
+      已繳費
+      <strong id="paidCount">0</strong>
+    </div>
+  </div>
+
   <p id="total"></p>
+
+  <div class="toolbar">
+    <input
+      id="searchInput"
+      type="text"
+      placeholder="搜尋姓名、電話或 Email"
+    >
+    <button id="exportButton">匯出 Excel</button>
+    <button id="refreshButton">重新整理</button>
+  </div>
 
   <div class="table-wrap">
     <table>
@@ -112,6 +172,7 @@ select { width: 125px; }
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <script>
 const SUPABASE_URL = "https://aubecuexezekhurqpgnh.supabase.co";
@@ -121,6 +182,8 @@ const db = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
+
+let allRegistrations = [];
 
 const loginArea = document.getElementById("loginArea");
 const adminArea = document.getElementById("adminArea");
@@ -161,6 +224,8 @@ async function checkAdmin() {
 }
 
 async function loadRegistrations() {
+  showMessage("正在讀取報名資料……", true);
+
   const { data, error } = await db
     .from("registrations")
     .select("id, name, phone, email, status, payment_status, created_at")
@@ -171,11 +236,44 @@ async function loadRegistrations() {
     return;
   }
 
-  document.getElementById("total").textContent =
-    "目前報名資料共 " + data.length + " 筆";
+  allRegistrations = data || [];
 
+  updateStatistics();
+  renderRegistrations(allRegistrations);
+
+  showMessage("資料更新完成！", true);
+}
+
+function updateStatistics() {
+  document.getElementById("pendingCount").textContent =
+    allRegistrations.filter(x => x.status === "pending").length;
+
+  document.getElementById("confirmedCount").textContent =
+    allRegistrations.filter(x => x.status === "confirmed").length;
+
+  document.getElementById("waitlistCount").textContent =
+    allRegistrations.filter(x => x.status === "waitlist").length;
+
+  document.getElementById("paidCount").textContent =
+    allRegistrations.filter(x => x.payment_status === "paid").length;
+
+  document.getElementById("total").textContent =
+    "目前共有 " + allRegistrations.length + " 筆報名資料";
+}
+
+function renderRegistrations(data) {
   const list = document.getElementById("registrationList");
   list.innerHTML = "";
+
+  if (data.length === 0) {
+    const tr = document.createElement("tr");
+    const td = document.createElement("td");
+    td.colSpan = 6;
+    td.textContent = "找不到符合條件的學員資料";
+    tr.appendChild(td);
+    list.appendChild(tr);
+    return;
+  }
 
   data.forEach(item => {
     const tr = document.createElement("tr");
@@ -190,18 +288,15 @@ async function loadRegistrations() {
     addText(item.phone);
     addText(item.email);
 
-    // 報名狀態選單
     const statusCell = document.createElement("td");
     const statusSelect = document.createElement("select");
 
-    const statusOptions = [
+    [
       ["pending", "待確認"],
       ["confirmed", "已確認"],
       ["waitlist", "候補"],
       ["cancelled", "取消"]
-    ];
-
-    statusOptions.forEach(([value, label]) => {
+    ].forEach(([value, label]) => {
       const option = document.createElement("option");
       option.value = value;
       option.textContent = label;
@@ -211,27 +306,19 @@ async function loadRegistrations() {
     statusSelect.value = item.status || "pending";
 
     statusSelect.addEventListener("change", async () => {
-      await updateField(
-        item.id,
-        "status",
-        statusSelect.value,
-        statusSelect
-      );
+      await updateField(item.id, "status", statusSelect.value, statusSelect);
     });
 
     statusCell.appendChild(statusSelect);
     tr.appendChild(statusCell);
 
-    // 繳費狀態選單
     const paymentCell = document.createElement("td");
     const paymentSelect = document.createElement("select");
 
-    const paymentOptions = [
+    [
       ["unpaid", "未繳費"],
       ["paid", "已繳費"]
-    ];
-
-    paymentOptions.forEach(([value, label]) => {
+    ].forEach(([value, label]) => {
       const option = document.createElement("option");
       option.value = value;
       option.textContent = label;
@@ -266,38 +353,93 @@ async function updateField(id, field, value, select) {
   select.disabled = true;
   showMessage("正在儲存修改……", true);
 
-  const { error } = await db
+  const { data, error } = await db
     .from("registrations")
     .update({ [field]: value })
-    .eq("id", id);
+    .eq("id", id)
+    .select("id");
 
   select.disabled = false;
 
-  if (error) {
-    showMessage("修改失敗：" + error.message);
+  if (error || !data || data.length === 0) {
+    showMessage(
+      "修改失敗：" + (error ? error.message : "沒有成功更新資料")
+    );
     await loadRegistrations();
     return;
   }
 
-  const labels = {
-    pending: "待確認",
-    confirmed: "已確認",
-    waitlist: "候補",
-    cancelled: "取消",
-    unpaid: "未繳費",
-    paid: "已繳費"
-  };
+  showMessage("修改成功！", true);
+  await loadRegistrations();
+}
 
-  showMessage(
-    "修改成功！目前狀態：" + labels[value],
-    true
+function searchRegistrations() {
+  const keyword = document
+    .getElementById("searchInput")
+    .value.trim()
+    .toLowerCase();
+
+  const filtered = allRegistrations.filter(item => {
+    return (
+      (item.name || "").toLowerCase().includes(keyword) ||
+      (item.phone || "").toLowerCase().includes(keyword) ||
+      (item.email || "").toLowerCase().includes(keyword)
+    );
+  });
+
+  renderRegistrations(filtered);
+}
+
+function exportExcel() {
+  if (!window.XLSX) {
+    showMessage("Excel 匯出工具載入失敗，請重新整理頁面。");
+    return;
+  }
+
+  if (allRegistrations.length === 0) {
+    showMessage("目前沒有可以匯出的資料。");
+    return;
+  }
+
+  const rows = allRegistrations.map(item => ({
+    "姓名": item.name,
+    "電話": item.phone,
+    "電子郵件": item.email || "",
+    "報名狀態": {
+      pending: "待確認",
+      confirmed: "已確認",
+      waitlist: "候補",
+      cancelled: "取消"
+    }[item.status] || item.status,
+    "繳費狀態": {
+      unpaid: "未繳費",
+      paid: "已繳費"
+    }[item.payment_status] || item.payment_status,
+    "報名時間": item.created_at
+      ? new Date(item.created_at).toLocaleString("zh-TW")
+      : ""
+  }));
+
+  const worksheet = XLSX.utils.json_to_sheet(rows);
+  const workbook = XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    worksheet,
+    "學員報名名單"
   );
+
+  XLSX.writeFile(
+    workbook,
+    "育陽舞蹈團_報名名單.xlsx"
+  );
+
+  showMessage("Excel 名單已匯出！", true);
 }
 
 document.getElementById("loginButton")
 .addEventListener("click", async () => {
   const button = document.getElementById("loginButton");
-
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
 
@@ -327,10 +469,20 @@ document.getElementById("loginButton")
 document.getElementById("logoutButton")
 .addEventListener("click", async () => {
   await db.auth.signOut();
+  allRegistrations = [];
   adminArea.classList.add("hidden");
   loginArea.classList.remove("hidden");
   showMessage("已登出。", true);
 });
+
+document.getElementById("searchInput")
+.addEventListener("input", searchRegistrations);
+
+document.getElementById("exportButton")
+.addEventListener("click", exportExcel);
+
+document.getElementById("refreshButton")
+.addEventListener("click", loadRegistrations);
 
 checkAdmin();
 </script>
