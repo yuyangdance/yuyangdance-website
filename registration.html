@@ -266,7 +266,7 @@
     // 請保留你原本的 Supabase 網址及 Publishable Key
     const SUPABASE_URL = "https://aubecuexezekhurqpgnh.supabase.co";
     const SUPABASE_KEY = "sb_publishable_ANt2-fgu_mihXGzKVle_1g_RGZZp9VG";
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
     
     const form = document.getElementById("registrationForm");
     const button = document.getElementById("submitButton");
@@ -422,57 +422,7 @@ loadCapacity();
     });
 
 
-        // 如果 Supabase 回傳錯誤
-        if (error) {
-          console.error("Supabase RPC 錯誤：", error);
-          throw new Error(error.message || "資料庫連線失敗");
-        }
-
-        // 取得報名結果
-        const result = Array.isArray(data) ? data[0] : data;
-
-        if (!result) {
-          throw new Error("沒有取得報名結果，請稍後再試。");
-        }
-
-        // 依照資料庫回傳狀態顯示訊息
-        if (result.registration_status === "pending") {
-
-          message.textContent =
-            "報名申請已送出！\n" +
-            "目前為待確認狀態，主辦單位將另行通知繳費。";
-
-        } else if (result.registration_status === "waitlist") {
-
-          message.textContent =
-            "目前招生名額已滿，已為您登記候補。\n" +
-            "如有名額釋出，主辦單位將另行聯絡。";
-
-        } else {
-
-          throw new Error("收到無法辨識的報名狀態。");
-
-        }
-
-        // 成功後才清空表單
-        form.reset();
         
-        // 更新目前招生名額
-await loadCapacity();
-
-      } catch (error) {
-
-        console.error("報名失敗：", error);
-
-        message.textContent =
-          "報名失敗：" +
-          (error.message || String(error)) +
-          "\n請稍後再試，或聯絡主辦單位。";
-
-      } finally {
-
-        button.disabled = false;
-        button.textContent = "送出報名申請";
 
       }
     });
