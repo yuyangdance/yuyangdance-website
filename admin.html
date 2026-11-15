@@ -149,7 +149,8 @@ td select { width: 120px; }
       placeholder="搜尋姓名、電話或 Email"
     >
     <button id="exportButton">匯出 Excel</button>
-    <button id="refreshButton">重新整理</button>
+<button id="refreshButton">重新整理</button>
+<button id="promoteButton">遞補下一位</button>
   </div>
 
   <div class="table-wrap">
@@ -483,6 +484,42 @@ document.getElementById("exportButton")
 
 document.getElementById("refreshButton")
 .addEventListener("click", loadRegistrations);
+
+// 遞補下一位候補學員
+document.getElementById("promoteButton")
+.addEventListener("click", async () => {
+
+  const confirmed = confirm(
+    "確定要將最早報名的候補學員遞補為已確認嗎？"
+  );
+
+  if (!confirmed) return;
+
+  const button = document.getElementById("promoteButton");
+
+  button.disabled = true;
+  showMessage("正在處理候補遞補……", true);
+
+  const { data, error } = await db.rpc(
+    "promote_next_waitlist"
+  );
+
+  button.disabled = false;
+
+  if (error) {
+    showMessage("遞補失敗：" + error.message);
+    return;
+  }
+
+  if (!data.success) {
+    showMessage(data.message);
+    return;
+  }
+
+  showMessage(data.message, true);
+
+  await loadRegistrations();
+});
 
 checkAdmin();
 </script>
