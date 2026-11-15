@@ -187,43 +187,67 @@
       繳費方式：報名後由主辦單位通知繳費
     </div>
 
-    <form id="registrationForm">
+    
 
-      <label for="name">姓名 *</label>
-      <input
-        id="name"
-        name="name"
-        required
-        maxlength="80"
-        autocomplete="name"
-        placeholder="請輸入真實姓名"
-      >
+<form id="registrationForm">
 
-      <label for="phone">聯絡電話 *</label>
-      <input
-        id="phone"
-        name="phone"
-        required
-        maxlength="30"
-        autocomplete="tel"
-        placeholder="請輸入聯絡電話"
-      >
+  <h3>一、學生基本資料</h3>
 
-      <label for="email">電子郵件</label>
-      <input
-        id="email"
-        name="email"
-        type="email"
-        maxlength="254"
-        autocomplete="email"
-        placeholder="請輸入電子郵件"
-      >
+  <label for="name">報名者姓名 *</label>
+  <input id="name" name="name" required maxlength="80"
+    placeholder="請輸入學生真實姓名">
 
-      <button id="submitButton" type="submit">
-        送出報名申請
-      </button>
+  <label for="gender">性別 *</label>
+  <select id="gender" name="gender" required>
+    <option value="">請選擇</option>
+    <option value="男">男</option>
+    <option value="女">女</option>
+    <option value="其他">其他</option>
+    <option value="不願透露">不願透露</option>
+  </select>
 
-    </form>
+  <label for="birth_date">出生年月日 *</label>
+  <input id="birth_date" name="birth_date" type="date" required>
+
+  <label for="grade">目前學齡（年級） *</label>
+  <input id="grade" name="grade" required maxlength="50"
+    placeholder="例如：國小六年級、大學二年級">
+
+  <label for="school">就讀學校 *</label>
+  <input id="school" name="school" required maxlength="100"
+    placeholder="請輸入學校名稱">
+
+  <label for="dance_experience">舞齡與舞蹈風格 *</label>
+  <textarea id="dance_experience" name="dance_experience"
+    rows="4" maxlength="1000" required
+    placeholder="請填寫舞齡及曾學習的舞蹈風格"></textarea>
+
+  <h3>二、家長／聯絡人資料</h3>
+
+  <label for="guardian_name">家長（聯絡人）姓名 *</label>
+  <input id="guardian_name" name="guardian_name"
+    required maxlength="80" placeholder="請輸入聯絡人姓名">
+
+  <label for="phone">手機號碼 *</label>
+  <input id="phone" name="phone" required
+    maxlength="30" autocomplete="tel"
+    placeholder="請輸入聯絡人手機號碼">
+
+  <label for="email">電子郵件 *</label>
+  <input id="email" name="email" type="email"
+    required maxlength="254" autocomplete="email"
+    placeholder="請輸入電子郵件">
+
+  <label for="line_id">LINE ID *</label>
+  <input id="line_id" name="line_id" required maxlength="100"
+    placeholder="請輸入 LINE ID">
+
+  <button id="submitButton" type="submit">
+    送出報名申請
+  </button>
+
+</form>
+
 
     <div id="message" role="status" aria-live="polite"></div>
 
@@ -306,6 +330,7 @@ async function loadCapacity() {
 
 // 網頁開啟時自動查詢
 loadCapacity();
+    
     // 處理報名送出
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -313,11 +338,22 @@ loadCapacity();
       if (button.disabled) return;
 
       const name = document.getElementById("name").value.trim();
+      const gender = document.getElementById("gender").value;
+      const birthDate = document.getElementById("birth_date").value;
+      const grade = document.getElementById("grade").value.trim();
+      const school = document.getElementById("school").value.trim();
+      const danceExperience = document.getElementById("dance_experience").value.trim();
+      const guardianName = document.getElementById("guardian_name").value.trim();
       const phone = document.getElementById("phone").value.trim();
       const email = document.getElementById("email").value.trim();
+      const lineId = document.getElementById("line_id").value.trim();
 
-      if (!name || !phone) {
-        message.textContent = "請填寫姓名及聯絡電話。";
+      if (
+        !name || !gender || !birthDate || !grade ||
+        !school || !danceExperience || !guardianName ||
+        !phone || !email || !lineId
+      ) {
+        message.textContent = "請完整填寫所有必填資料。";
         return;
       }
 
@@ -331,9 +367,59 @@ loadCapacity();
           {
             p_name: name,
             p_phone: phone,
-            p_email: email || null
+            p_email: email,
+            p_gender: gender,
+            p_birth_date: birthDate,
+            p_grade: grade,
+            p_school: school,
+            p_dance_experience: danceExperience,
+            p_guardian_name: guardianName,
+            p_line_id: lineId
           }
         );
+
+        if (error) {
+          console.error("Supabase RPC 錯誤：", error);
+          throw new Error(error.message || "資料庫連線失敗");
+        }
+
+        const result = Array.isArray(data) ? data[0] : data;
+
+        if (!result) {
+          throw new Error("沒有取得報名結果，請稍後再試。");
+        }
+
+        if (result.registration_status === "pending") {
+          message.textContent =
+            "報名申請已送出！\n" +
+            "目前為待確認狀態，主辦單位將另行通知繳費。";
+
+        } else if (result.registration_status === "waitlist") {
+          message.textContent =
+            "目前招生名額已滿，已為您登記候補。\n" +
+            "如有名額釋出，主辦單位將另行聯絡。";
+
+        } else {
+          throw new Error("收到無法辨識的報名狀態。");
+        }
+
+        form.reset();
+        await loadCapacity();
+
+      } catch (error) {
+        console.error("報名失敗：", error);
+
+        message.textContent =
+          "報名失敗：" +
+          (error.message || String(error)) +
+          "\n請稍後再試，或聯絡主辦單位。";
+
+      } finally {
+        button.disabled = false;
+        button.textContent = "送出報名申請";
+      }
+    });
+
 
         // 如果 Supabase 回傳錯誤
         if (error) {
